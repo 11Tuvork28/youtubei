@@ -114,7 +114,7 @@ export default class SearchResult<T> extends Array<SearchResultType<T>> {
 	}
 
 	/** Load videos data from youtube */
-	private loadSearchResult(sectionListContents: YoutubeRawData): Array<SearchResultType<T>> {
+	loadSearchResult(sectionListContents: YoutubeRawData): Array<SearchResultType<T>> {
 		const contents = sectionListContents
 			.filter((c: Record<string, unknown>) => "itemSectionRenderer" in c)
 			.pop().itemSectionRenderer.contents;
