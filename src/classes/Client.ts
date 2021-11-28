@@ -12,16 +12,16 @@ export namespace Client {
 	export type SearchOptions = {
 		/** Search type, can be `"video"`, `"channel"`, `"playlist"`, or `"all"` */
 		type: SearchType;
+		/** Raw search params to be passed on the request, ignores `type` value if this is provided */
+		params: string;
 	};
 
 	export type ClientOptions = {
 		cookie: string;
-		/** 2-chars language code for localization */
-		hl: string;
-		/** 2-chars country code  */
-		gl: string;
 		/** Optional options for http client */
-		httpOptions: Partial<RequestOptions>;
+		requestOptions: Partial<RequestOptions>;
+		/** Optional options passed when sending a request to youtube (context.client) */
+		youtubeClientOptions: Record<string, unknown>;
 		/** Use Node `https` module, set false to use `http` */
 		https: boolean;
 	};
@@ -31,19 +31,21 @@ export namespace Client {
 export default class Client {
 	/** @hidden */
 	http: HTTP;
-	/** @hidden */
-	options: Client.ClientOptions;
 
 	constructor(options: Partial<Client.ClientOptions> = {}) {
-		this.options = {
-			hl: "en",
-			gl: "US",
+		const fullOptions: Client.ClientOptions = {
 			cookie: "",
 			https: true,
-			httpOptions: {},
+			requestOptions: {},
 			...options,
+			youtubeClientOptions: {
+				hl: "en",
+				gl: "US",
+				...options.youtubeClientOptions,
+			},
 		};
-		this.http = new HTTP(this, options.httpOptions);
+
+		this.http = new HTTP(fullOptions);
 	}
 
 	/**
@@ -59,6 +61,7 @@ export default class Client {
 	): Promise<SearchResult<T["type"]>> {
 		const options: Client.SearchOptions = {
 			type: "all",
+			params: "",
 			...searchOptions,
 		};
 
